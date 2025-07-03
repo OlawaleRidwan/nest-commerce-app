@@ -9,8 +9,8 @@ export class Wallet extends Document {
   @Prop({ type: Number, default: 0, min: 0 })
   balance: number;
 
-  // @Prop({ type: [{ type: Types.ObjectId, ref: 'Transaction' }] })
-  // transactions: Types.ObjectId[];
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Transaction' }] })
+  transactions: Types.ObjectId[];
 
   @Prop({
     type: {

@@ -51,13 +51,13 @@ export class WalletController {
     return this.walletService.debitWallet(userId, amount);
   }
 
-  // @Patch('transaction/:userId/:transactionId')
-  // async updateWalletWithTransaction(
-  //   @Param('userId') userId: string,
-  //   @Param('transactionId') transactionId: string,
-  // ) {
-  //   return this.walletService.updateWalletWithTransaction(userId, transactionId);
-  // }
+  @Patch('transaction/:userId/:transactionId')
+  async updateWalletWithTransaction(
+    @Param('userId') userId: string,
+    @Param('transactionId') transactionId: string,
+  ) {
+    return this.walletService.updateWalletWithTransaction(userId, transactionId);
+  }
 
   @Patch('account-details/:userId')
   async updateAccountDetails(

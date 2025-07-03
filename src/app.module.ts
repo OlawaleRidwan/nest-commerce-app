@@ -10,6 +10,7 @@ import { UserModule } from './user/user.module';
 import { RedisModule } from './redis/redis.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { TransactionsModule } from './transactions/transactions.module';
     AuthModule,
     UserModule,
     WalletModule,
-    TransactionsModule],
+    TransactionsModule,
+    CartModule],
   controllers: [AppController],
   providers: [AppService],
 })
