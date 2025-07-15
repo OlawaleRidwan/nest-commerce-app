@@ -68,7 +68,7 @@ export class PaystackUtil {
     totalPrice: number;
     paymentMethod: string;
   }) {
-    const { buyerEmail, totalPrice } = payload;
+    const {product, buyerEmail,buyerName,seller,quantity,price,totalPrice,paymentMethod } = payload;
     if (totalPrice <= 0) throw new Error('Amount must be > 0');
 
     const res$ = this.httpService.post(
@@ -77,7 +77,7 @@ export class PaystackUtil {
         email: buyerEmail,
         amount: Math.round(totalPrice * 100),
         currency: 'NGN',
-        callback_url: 'https://your-app.com/callback',
+        callback_url: 'https://www.google.com',
         metadata: payload,
       },
       { headers: this.headers },
@@ -103,6 +103,9 @@ export class PaystackUtil {
   }
 
   async initiateWithdrawal(recipientCode: string, amount: number) {
+
+    try {
+
     const res$ = this.httpService.post(
       'https://api.paystack.co/transfer',
       {
@@ -114,6 +117,17 @@ export class PaystackUtil {
       { headers: this.headers },
     );
     const response = await lastValueFrom(res$);
+
     return response.data;
   }
+  catch (error) {
+    // Log full Paystack error response
+    console.error('❌ Paystack withdrawal error:', {
+      message: error?.response?.data?.message,
+      status: error?.response?.status,
+      details: error?.response?.data,
+    });
+  }
+}
+
 }

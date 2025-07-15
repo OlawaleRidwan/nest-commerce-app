@@ -11,6 +11,9 @@ import { RedisModule } from './redis/redis.module';
 import { WalletModule } from './wallet/wallet.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { CartModule } from './cart/cart.module';
+import { PaystackModule } from './paystack/paystack.module';
+import { AdminModule } from './admin/admin.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -21,12 +24,16 @@ import { CartModule } from './cart/cart.module';
     MongooseModule.forRoot(process.env.DB_URL!),
     EventEmitterModule.forRoot(),
     RedisModule,
+    PaystackModule,
     ProductModule,
     AuthModule,
     UserModule,
     WalletModule,
     TransactionsModule,
-    CartModule],
+    CartModule,
+    AdminModule,
+    ChatModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

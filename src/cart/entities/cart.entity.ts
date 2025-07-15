@@ -32,4 +32,4 @@ export class Cart {
   totalPrice: number;
 }
 
-export const CartSchema = SchemaFactory.createForClass(Cart);
+export const CartEntity = SchemaFactory.createForClass(Cart);

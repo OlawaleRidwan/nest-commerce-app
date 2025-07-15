@@ -8,6 +8,7 @@ import { Request } from 'express';
 import { SearchProductDto } from './dto/search-product.dto';
 import { Types } from 'mongoose';
 
+
 @Controller('product')
 export class ProductController {
   constructor(private readonly productService: ProductService) {}

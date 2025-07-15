@@ -1,5 +1,5 @@
 // transaction.service.ts
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Transaction } from './entities/transaction.entity';
@@ -12,11 +12,14 @@ import { CreateTransactionDto } from './dto/create-transaction.dto';
 export class TransactionService {
   constructor(
     @InjectModel(Transaction.name) private transactionModel: Model<Transaction>,
+    @Inject(forwardRef(() => WalletService))
     private readonly walletService: WalletService,
     private readonly productService: ProductService,
   ) {}
 
   async createTransaction(createTransactionDto: CreateTransactionDto) {
+    
+    console.log(3)
     const {
       product,
       buyerEmail,
@@ -40,7 +43,7 @@ export class TransactionService {
     if (!sellerWallet) {
       throw new NotFoundException('Seller wallet not found');
     }
-
+    console.log(4)
     // Create transaction
     const transaction = await this.transactionModel.create({
       product,
@@ -56,7 +59,7 @@ export class TransactionService {
     });
 
     // Update product quantity
-    await this.productService.updateProductQuantityById(product, quantity);
+    await this.productService.updateProductQuantityById(product, -quantity);
 
     // Credit seller's wallet
     await this.walletService.creditWallet(seller, price);

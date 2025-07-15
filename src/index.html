@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Chat Test</title>
+  <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+  <h2>Socket.IO Chat</h2>
+
+  <!-- Sender setup -->
+  <div>
+    <input id="senderId" placeholder="Your ID" />
+    <input id="senderUsername" placeholder="Your Username" />
+    <button onclick="connectSocket()">Connect</button>
+  </div>
+
+  <!-- Chat area -->
+  <div style="margin-top: 20px;">
+    <input id="receiverId" placeholder="Receiver ID" />
+    <input id="receiverUsername" placeholder="Receiver Username" />
+    <input id="message" placeholder="Type a message" />
+    <input type="file" id="imageUpload" accept="image/*" />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+  <ul id="chatLog"></ul>
+
+  <script>
+    let socket;
+    let senderId = '';
+    let senderUsername = '';
+
+    function connectSocket() {
+      senderId = document.getElementById('senderId').value.trim();
+      senderUsername = document.getElementById('senderUsername').value.trim();
+
+      if (!senderId || !senderUsername) {
+        alert('Please enter your ID and username');
+        return;
+      }
+
+      socket = io('http://localhost:4000', {
+        query: { userId: senderId }
+      });
+
+      socket.on('connect', () => {
+        console.log('Connected to server as:', senderId);
+
+        // Fetch chat summaries
+        socket.emit('get_chat_summaries', {
+          userId: senderId, page: 1, limit: 10
+        }, (response) => {
+          console.log('Chat summaries:', response);
+        });
+
+        // Optionally fetch a conversation
+        socket.emit('get_conversation', {
+          userId: senderId,
+          chatPartnerId: '687242e254d1dfb7c26fa75e',
+          page: 1,
+          limit: 20
+        }, (messages) => {
+          console.log('Conversation:', messages);
+        });
+      });
+
+      socket.on('new_message', (msg) => {
+        const li = document.createElement('li');
+        li.innerHTML = `[${msg.senderUsername}] ${msg.content || ''}`;
+
+        if (msg.images?.length) {
+          msg.images.forEach(image => {
+            const img = document.createElement('img');
+            img.src = image.Location || image; // S3 or base64
+            img.style.maxWidth = '200px';
+            img.style.display = 'block';
+            li.appendChild(img);
+          });
+        }
+
+        document.getElementById('chatLog').appendChild(li);
+      });
+    }
+
+    async function sendMessage() {
+      if (!socket || !socket.connected) {
+        alert('You must connect first.');
+        return;
+      }
+
+      const receiverId = document.getElementById('receiverId').value;
+      const receiverUsername = document.getElementById('receiverUsername').value;
+      const content = document.getElementById('message').value;
+      const fileInput = document.getElementById('imageUpload');
+      const file = fileInput.files[0];
+
+      if (!receiverId || !receiverUsername || (!content && !file)) {
+        alert('Please enter message content or select an image');
+        return;
+      }
+
+      let base64Image = null;
+      let imageMimeType = null;
+
+      if (file) {
+        base64Image = await convertToBase64(file);
+        imageMimeType = file.type;
+      }
+
+      socket.emit('send_message', {
+        senderId,
+        receiverId,
+        content,
+        senderUsername,
+        receiverUsername,
+        image: base64Image,
+        imageMimeType
+      });
+
+      document.getElementById('message').value = '';
+      fileInput.value = '';
+    }
+
+    function markAsRead() {
+      const receiverId = document.getElementById('receiverId').value;
+
+      socket.emit('mark_as_read', {
+        userId: senderId,
+        chatPartnerId: receiverId,
+      });
+    }
+
+    function convertToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</body>
+</html>

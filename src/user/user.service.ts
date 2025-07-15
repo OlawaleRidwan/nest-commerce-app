@@ -5,6 +5,7 @@ import { User } from './entities/user.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 import { doHash, doHashValidation , hmacProcess} from "../utils/hashing";
+import { Role } from 'src/auth/enums/roles.enum';
 
 
 @Injectable()
@@ -14,24 +15,6 @@ export class UserService {
     private userModel: Model<User>,
   ) {}
 
-
-  // createUser() {
-
-  // }
-
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateUserDetailsDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  // auth.service.ts
 
 async updateUserDetails(userId: string, verified: boolean, dto: UpdateUserDetailsDto) {
   
@@ -71,10 +54,6 @@ async updateUserDetails(userId: string, verified: boolean, dto: UpdateUserDetail
 
 }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
-  }
-
   async getOneByQuery  (filter: FilterQuery<User>,select?: string) {
 
     try {
@@ -101,6 +80,58 @@ async updateUserDetails(userId: string, verified: boolean, dto: UpdateUserDetail
   }
   
   };
+
+  
+  // ✅ Get all users (optionally filterable)
+  async getAll(filter: Partial<User> = {}): Promise<User[]> {
+    return this.userModel.find(filter).select('-password -verificationCode -forgotPasswordCode');
+  }
+
+  // ✅ Update user's suspension status
+  async updateStatus(userId: string, isSuspended: boolean) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    user.isSuspended = isSuspended;
+    await user.save();
+
+    return { success: true, message: `User has been ${isSuspended ? 'suspended' : 'unsuspended'}` };
+  }
+
+  // ✅ Update user's role
+  async updateRole(userId: string, newRole: Role) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    user.role = newRole;
+    await user.save();
+
+    return { success: true, message: `User role updated to ${newRole}` };
+  }
+
+  // ✅ Promote user to moderator (or demote)
+  async promoteUser(userId: string, promoteTo: Role = Role.Moderator) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.role === promoteTo) {
+      throw new BadRequestException(`User is already a ${promoteTo}`);
+    }
+
+    user.role = promoteTo;
+    await user.save();
+
+    return { success: true, message: `User promoted to ${promoteTo}` };
+  }
+
+  // ✅ Delete user
+  async deleteUser(userId: string) {
+    const result = await this.userModel.findByIdAndDelete(userId);
+    if (!result) throw new NotFoundException('User not found or already deleted');
+
+    return { success: true, message: 'User account deleted successfully' };
+  }
+
 
 }
 

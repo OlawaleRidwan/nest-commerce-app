@@ -11,9 +11,9 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       // host: process.env.REDIS_HOST || '127.0.0.1',
       // port: Number(process.env.REDIS_PORT) || 6379,
       // password: process.env.REDIS_PASSWORD || undefined,
-      host: 'redis-19723.c251.east-us-mz.azure.redns.redis-cloud.com',
-      port: 19723,
-      password: 'xuKioNwrUdru33Cc5epMSCBsOrgMaxEO',
+      host: 'redis-14221.c12.us-east-1-4.ec2.redns.redis-cloud.com',
+      port: 14221,
+      password: 'Usz6GdZKkc8Z48rUlXT9EjgRnBn68ZNh',
     });
 
     this.client.on('connect', () => {

@@ -5,7 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UserSchema } from './entities/auth.entity';
+// import { UserSchema } from './entities/auth.entity';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { SendVerificationEmailListener } from 'src/listeners/send-verification-email.listener';
 import { MailService } from 'src/mail/mail.service';
@@ -37,6 +37,6 @@ import { UserModule } from 'src/user/user.module';
   
   controllers: [AuthController],
   providers: [AuthService,SendVerificationEmailListener, MailService, JwtStrategy],
-  exports: [PassportModule, JwtModule]
+  exports: [PassportModule, JwtModule, AuthService]
 })
 export class AuthModule {}

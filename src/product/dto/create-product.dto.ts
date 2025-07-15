@@ -1,6 +1,5 @@
 import { IsEmpty, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString } from "class-validator";
 import { ProductCategory } from "../entities/product.entity";
-import { User } from "src/auth/entities/auth.entity";
 import { Types } from 'mongoose';
 
 

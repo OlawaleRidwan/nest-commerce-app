@@ -21,7 +21,7 @@ export class ProductService {
      
 
       const { name, price, quantity, description, color, size, category } = productDto;
-      const images = await uploadImages(files)
+      const images = await uploadImages(files,"books")
       
       const totalPrice: number = Number(price) + Number(0.05 * price);
 
@@ -140,7 +140,7 @@ export class ProductService {
     }
 
     const { name, price, quantity, description, color, size, category } = body;
-    const images = files?.length > 0 ? await uploadImages(files) : product.images;
+    const images = files?.length > 0 ? await uploadImages(files,"books") : product.images;
     if (name) product.name = name;
     if (price !== undefined) {
       product.price = price;
@@ -206,7 +206,6 @@ async deleteProduct(id: string): Promise<{ message: string }> {
             return JSON.parse(cachedProducts);
 
     }
-
 
     const query: any = { category };
     if (filter?.user) {
@@ -283,4 +282,5 @@ async searchProducts(filter: SearchProductDto): Promise<Product[]> {
   remove(id: number) {
     return `This action removes a #${id} product`;
   }
+  
 }

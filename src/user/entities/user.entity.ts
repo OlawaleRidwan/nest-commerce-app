@@ -78,7 +78,15 @@ export class User {
     default: Role.User
 }
 )
-role: "string"
+role: Role;
+
+// 🆕 Used to mark if the user is banned/suspended
+@Prop({ default: false })
+isSuspended: boolean;
+
+// 🆕 Optionally track who suspended or promoted the user
+@Prop({ default: null })
+modifiedByAdminId?: string;
 }
 
 export const UserEntity = SchemaFactory.createForClass(User);

@@ -49,4 +49,4 @@ export class Transaction {
   paymentMethod: 'card' | 'paypal' | 'crypto' | 'bank_transfer';
 }
 
-export const TransactionSchema = SchemaFactory.createForClass(Transaction);
+export const TransactionEntity = SchemaFactory.createForClass(Transaction);

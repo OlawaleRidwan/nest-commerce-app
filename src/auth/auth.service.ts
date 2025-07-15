@@ -118,10 +118,14 @@ if (isEmail) {
         { email: email_or_phone_number },
         { phone_number: email_or_phone_number },
       ],
-    },'+password');
+    },'+password +isSuspended');
 
     if (!user) {
       throw new UnauthorizedException('User does not exist!');
+    }
+
+    if (user.isSuspended) {
+    throw new UnauthorizedException('Your account has been suspended. Please contact support.');
     }
 
     const isValidPassword = await doHashValidation(password, user.password);
@@ -134,6 +138,7 @@ if (isEmail) {
       userId: user._id,
       user_name: user.username,
       verified: user.verified,
+      role: user.role,
     };
 
     const token = this.jwtService.sign(payload, {
@@ -155,14 +160,7 @@ if (isEmail) {
     };
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
+  // 
 
 
   // auth.service.ts
@@ -318,10 +316,7 @@ if (isEmail) {
       return { success: true, message: 'Code sent' };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
-  }
-
+  
   
 
 }

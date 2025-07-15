@@ -1,16 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Wallet} from './entities/wallet.entity';
 import { CreateWalletDto } from './dto/create-wallet.dto';
 import { UpdateWalletDto } from './dto/update-wallet.dto';
+// import { TransactionService } from 'src/transactions/transactions.service';
 
 @Injectable()
-
 export class WalletService {
   constructor(
     @InjectModel(Wallet.name)
     private walletModel: Model<Wallet>,
+    //  @Inject(forwardRef(() => TransactionService))
+    // private readonly transactionService: TransactionService,
   ) {}
 
   async createWallet(userId: string,createWalletDto: CreateWalletDto): Promise<Wallet> {

@@ -7,11 +7,16 @@ import {
   Res,
   Body,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { CartService } from './services/cart.service';
 import { GuestCartService } from './services/guestCart.service';
 import { RequestWithUser } from '../types/request-with-user.interface';
+import { OptionalAuthGuard } from '../auth/guards/optional-auth.guard';
+
+
+
 @Controller('cart')
 export class CartController {
   constructor(
@@ -19,6 +24,7 @@ export class CartController {
     private readonly guestCartService: GuestCartService,
   ) {}
 
+  @UseGuards(OptionalAuthGuard)
   @Post('add')
   async addToCart(
     @Req() req: RequestWithUser, @Res() res: Response, @Body() body) {
@@ -48,6 +54,7 @@ export class CartController {
     }
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Post('remove')
   async removeFromCart(
     @Req() req: RequestWithUser, 
@@ -78,8 +85,8 @@ export class CartController {
         .json({ success: false, message: error.message });
     }
   }
-
-  @Get()
+  @UseGuards(OptionalAuthGuard)
+  @Get('get-cart')
   async getCart(
     @Req() req: RequestWithUser,
      @Res() res: Response) {
@@ -101,6 +108,7 @@ export class CartController {
     }
   }
 
+  @UseGuards(OptionalAuthGuard)
   @Delete('clear')
   async clearCart(
     @Req() req: RequestWithUser,

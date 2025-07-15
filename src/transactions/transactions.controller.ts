@@ -19,7 +19,7 @@ import { WalletService } from '../wallet/wallet.service';
 import { AuthService } from '../auth/auth.service';
 import {
 PaystackUtil
-} from '../utils/paystack.utils';
+} from '../paystack/paystack.service';
 import { AuthGuard } from '@nestjs/passport'
 // import { sendEmail } from '../utils/send-message.util';
 // import { JwtAuthGuard } from '../auth/guards/';
@@ -28,11 +28,13 @@ import { hmacProcess} from "../utils/hashing";
 import { InitiateWithdrawalDto } from './dto/initiate-withdrawal.dto'
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
+import * as crypto from 'crypto';
 import { UserService } from 'src/user/user.service';
 import { UserSignedUpEvent } from 'src/events/user-signed-up.event';
+import { InitiateTransactionDto } from './dto/initiate-transaction.dto';
 
 @Controller('payments')
-export class PaymentsController {
+export class TransactionsController {
   constructor(
     private readonly transactionService: TransactionService,
     private readonly walletService: WalletService,
@@ -47,7 +49,7 @@ export class PaymentsController {
 
   @Post('initiate')
   async initiateTransaction(
-    @Body() createTransactionDto: CreateTransactionDto,
+    @Body() createTransactionDto: InitiateTransactionDto,
     @Res() res: Response,
   ) {
     try {
@@ -90,8 +92,8 @@ export class PaymentsController {
     }
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post('withdraw')
-  @UseGuards(AuthGuard)
   async initiateWithdrawal(
     @Body() initiateWithdrawalDto: InitiateWithdrawalDto,
     @Req() req: any,
@@ -103,7 +105,7 @@ export class PaymentsController {
 
       // Step 1: Fetch user's wallet details
       const wallet = await this.walletService.getWallet(userId);
-
+      console.log("Wallet",wallet)
       if (!wallet) {
         throw new HttpException('Wallet not found', HttpStatus.NOT_FOUND);
       }
@@ -120,12 +122,15 @@ export class PaymentsController {
         throw new HttpException('Invalid bank name', HttpStatus.BAD_REQUEST);
       }
 
+      console.log("Bank code ",bankCode)
       // Step 2: Create transfer recipient
       const recipientData = await this.payStackUtil.createTransferRecipient(
         accountHolderName,
         accountNumber,
         bankCode.code,
       );
+
+      console.log("Recepient Data", recipientData)
       const recipientCode = recipientData.data.recipient_code;
 
       // Step 3: Initiate withdrawal
@@ -203,22 +208,19 @@ export class PaymentsController {
         throw new HttpException('Forbidden: Invalid IP', HttpStatus.FORBIDDEN);
       }
 
+      const event = req.body;
+
       // Validate Paystack Signature
-
-    const hash = hmacProcess(this.configService.get('PAYSTACK_SECRET_KEY')!);
-
-      // const hash = crypto
-      //   .createHmac('sha512', this.configService.get('PAYSTACK_SECRET_KEY'))
-      //   .update(JSON.stringify(req.body))
-      //   .digest('hex');
+      const hash = crypto
+        .createHmac('sha512', this.configService.get('PAYSTACK_SECRET_KEY')!)
+        .update(JSON.stringify(event))
+        .digest('hex');
 
       if (hash !== signature) {
         throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
       }
 
-      const event = req.body;
-
-      if (req.body.event == 'charge.success') {
+      if (event.event == 'charge.success') {
         const amount = req.body.data.amount;
         let totalPrice = amount / 100;
         const metadata = event.data.metadata || {};
@@ -261,7 +263,7 @@ export class PaymentsController {
         );
       }
 
-      if (req.body.event == 'transfer.success') {
+      if (event.event == 'transfer.success') {
         const { userId } = req.user as { userId: string };
         const { amount } = req.body;
 
