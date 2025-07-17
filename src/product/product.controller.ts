@@ -46,6 +46,7 @@ export class ProductController {
   }
 
 
+
 @UseGuards(AuthGuard('jwt'))
 @UseInterceptors(FilesInterceptor('files'))
 @Put('update-product/:id')
@@ -70,6 +71,7 @@ async updateProduct(
     
     return this.productService.updateProduct( productId,updateProductDto, files);
   }
+
 
 @UseGuards(AuthGuard('jwt'))
 @Get('product/:id')
@@ -97,6 +99,7 @@ async updateProduct(
   ) {
     return this.productService.getProductsByCategory(category, { user });
   }
+
   
   @Patch('product-quantity/:id')
   async updateProductQuantityById(
@@ -116,7 +119,7 @@ async updateProduct(
 
 
   @UseGuards(AuthGuard('jwt'))
- @Get('search')
+  @Get('search')
   @UsePipes(new ValidationPipe({ transform: true }))
   async searchProducts(@Query() filter: SearchProductDto) {
     return this.productService.searchProducts(filter);
@@ -142,4 +145,5 @@ async updateProduct(
   remove(@Param('id') id: string) {
     return this.productService.remove(+id);
   }
+
 }
